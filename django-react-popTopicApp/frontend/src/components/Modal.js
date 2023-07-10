@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import {
     Button,
     Modal,
@@ -12,7 +12,7 @@ import {
 
 } from "reactstrap";
 
-export default class CustomModal extends Component {
+export default class CustomModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -54,15 +54,35 @@ export default class CustomModal extends Component {
                                 placeholder="Enter PopTopic description"
                             />
                         </FormGroup>
+                        <FormGroup>
+                            <Label for="genre">Genre</Label>
+                            <Input
+                                type="text"
+                                name="genre"
+                                value={this.state.activeItem.genre}
+                                onChange={this.handleChange}
+                                placeholder="Enter PopTopic genre"
+                            />
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="size">Size</Label>
+                            <Input
+                                type="text"
+                                name="size"
+                                value={this.state.activeItem.size}
+                                onChange={this.handleChange}
+                                placeholder="Enter PopTopic size (S/M/L)"
+                            />
+                        </FormGroup>
                         <FormGroup check>
-                            <Label for="completed">
+                            <Label for="outOfStock">
                                 <Input
                                     type="checkbox"
-                                    name="completed"
-                                    checked={this.state.activeItem.completed}
+                                    name="outOfStock"
+                                    checked={this.state.activeItem.outOfStock}
                                     onChange={this.handleChange}
                                 />
-                                Completed
+                                Out of Stock
                             </Label>
                         </FormGroup>
                     </Form>

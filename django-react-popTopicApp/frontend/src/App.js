@@ -1,21 +1,24 @@
-import React, { Component } from "react"
+import React from "react";
 import Modal from "./components/Modal";
 import axios from "axios";
 
-class App extends Component {
+class App extends React.Component {
     state = {
-        viewCompleted: false,
+        viewOutOfStock: false,
         activeItem: {
             title: "",
             description: "",
-            completed: false
+            genre: "",
+            size: "",
+            outOfStock: false
         },
-        popTopicList: []
+        popTopicList: [],
+        modal: false
     };
 
     async componentDidMount() {
         try {
-            const res = await fetch('http://localhost:8000/api/popTopics/');
+            const res = await fetch("http://localhost:8000/api/popTopics/");
             const popTopicList = await res.json();
             this.setState({
                 popTopicList
@@ -26,55 +29,82 @@ class App extends Component {
     }
 
     toggle = () => {
-        this.setState({ modal: !this.state.modal });
+        this.setState((prevState) => ({
+            modal: !prevState.modal
+        }));
     };
 
-    //Responsible for saving the task
-    handleSubmit = item => {
+    handleSubmit = async (item) => {
         this.toggle();
         if (item.id) {
-            axios
-                .put(`http://localhost:8000/api/popTopics/${item.id}/`, item)
-            return;
+            await axios.put(`http://localhost:8000/api/popTopics/${item.id}/`, item);
+        } else {
+            await axios.post("http://localhost:8000/api/popTopics/", item);
         }
-        axios
-            .post("http://localhost:8000/api/popTopics/", item)
+        this.fetchItems(); // Refresh the list of items
+    };
+
+    handleDelete = async (item) => {
+        if (item.id) {
+            await axios.delete(`http://localhost:8000/api/popTopics/${item.id}/`, item);
+        } else {
+            await axios.post("http://localhost:8000/api/popTopics/", item);
+        }
+        this.fetchItems(); // Refresh the list of items
+    };
+
+    fetchItems = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/popTopics/");
+            const popTopicList = await res.json();
+            this.setState({
+                popTopicList
+            });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     createItem = () => {
-        const item = { title: "", description: "", completed: false };
+        const item = { title: "", genre: "", size: "", description: "", outOfStock: false };
         this.setState({ activeItem: item, modal: !this.state.modal });
     };
 
-    displayCompleted = status => {
+    displayOutOfStock = status => {
         if (status) {
-            return this.setState({ viewCompleted: true });
+            return this.setState({ viewOutOfStock: true });
         }
-        return this.setState({ viewCompleted: false });
+        return this.setState({ viewOutOfStock: false });
     };
     renderTabList = () => {
         return (
             <div className="my-5 tab-list">
-                <button
-                    onClick={() => this.displayCompleted(true)}
-                    className={this.state.viewCompleted ? "active" : ""}
-                >
-                    Complete
-                </button>
-                <button
-                    onClick={() => this.displayCompleted(false)}
-                    className={this.state.viewCompleted ? "" : "active"}
-                >
-                    Incomplete
-                </button>
+                <div className="button-container">
+                    <button
+                        onClick={() => this.displayOutOfStock(true)}
+                        className={this.state.viewOutOfStock ? "active" : ""}
+                    >
+                        Out of Stock
+                    </button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button
+                        onClick={() => this.displayOutOfStock(false)}
+                        className={this.state.viewOutOfStock ? "" : "active"}
+                    >
+                        In Stock
+                    </button>
+                </div>
+                <p></p>
+                <p>{this.state.viewOutOfStock ? "Viewing Out of Stock items" : "Viewing In Stock Items"}</p>
             </div>
         );
     };
 
+
     renderItems = () => {
-        const { viewCompleted } = this.state;
+        const { viewOutOfStock } = this.state;
         const newItems = this.state.popTopicList.filter(
-            item => item.completed === viewCompleted
+            item => item.outOfStock === viewOutOfStock
         );
         return newItems.map(item => (
             <li
@@ -82,12 +112,16 @@ class App extends Component {
                 className="list-group-item d-flex justify-content-between align-items-center"
             >
                 <span
-                    className={`popTopic-title mr-2 ${this.state.viewCompleted ? "completed-popTopic" : ""
+                    className={`popTopic-title mr-2 ${this.state.viewOutOfStock ? "outOfStock-popTopic" : ""
                         }`}
-                    title={item.description}
+                    title={item.title}
                 >
-                    {item.title}
+                    <h1>{item.genre + " - " + item.title}</h1>
+                    <h5>{"Size " + item.size + " - " + item.description}</h5>
                 </span>
+                <button className="btn btn-danger" onClick={() => this.handleDelete(item)}>
+                    X
+                </button>
             </li>
         ));
     };
