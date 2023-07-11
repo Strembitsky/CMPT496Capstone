@@ -4,11 +4,7 @@ import {
     Modal,
     ModalHeader,
     ModalBody,
-    ModalFooter,
-    Form,
-    FormGroup,
-    Input,
-    Label
+    ModalFooter
 
 } from "reactstrap";
 
@@ -27,69 +23,53 @@ export default class CustomModal extends React.Component {
         const activeItem = { ...this.state.activeItem, [name]: value };
         this.setState({ activeItem });
     };
+    handleClose = () => {
+        const { toggleAdd } = this.props;
+        toggleAdd(); // Call the toggleAdd function to close the Modal
+    };
     render() {
-        const { toggle, onSave } = this.props;
+        const { toggleAdd, onSave } = this.props;
         return (
-            <Modal isOpen={true} toggle={toggle}>
-                <ModalHeader toggle={toggle}>PopTopic Item</ModalHeader>
-                <ModalBody>
-                    <Form>
-                        <FormGroup>
-                            <Label for="title">Title</Label>
-                            <Input
-                                type="text"
-                                name="title"
-                                value={this.state.activeItem.title}
-                                onChange={this.handleChange}
-                                placeholder="Enter PopTopic Title"
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label for="description">Description</Label>
-                            <Input
-                                type="text"
-                                name="description"
-                                value={this.state.activeItem.description}
-                                onChange={this.handleChange}
-                                placeholder="Enter PopTopic description"
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label for="genre">Genre</Label>
-                            <Input
-                                type="text"
-                                name="genre"
-                                value={this.state.activeItem.genre}
-                                onChange={this.handleChange}
-                                placeholder="Enter PopTopic genre"
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label for="size">Size</Label>
-                            <Input
-                                type="text"
-                                name="size"
-                                value={this.state.activeItem.size}
-                                onChange={this.handleChange}
-                                placeholder="Enter PopTopic size (S/M/L)"
-                            />
-                        </FormGroup>
-                        <FormGroup check>
-                            <Label for="outOfStock">
-                                <Input
-                                    type="checkbox"
-                                    name="outOfStock"
-                                    checked={this.state.activeItem.outOfStock}
-                                    onChange={this.handleChange}
-                                />
-                                Out of Stock
-                            </Label>
-                        </FormGroup>
-                    </Form>
+            <Modal isOpen={true} toggle={toggleAdd} size="lg" style={{minWidth: "50%", minHeight: "50%"} }>
+                <ModalHeader toggle={toggleAdd} style={{ backgroundColor: "#1f1e25", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View PopTopic</ModalHeader>
+                <ModalBody style={{ backgroundColor: "#1f1e25"}}>
+                    <div>
+                        <h2 style={{ textDecoration: 'underline', paddingLeft: '10px', color: "#e2e8f0" }}>{this.state.activeItem.genre + " - " + this.state.activeItem.title}</h2>
+                    </div>
+                    <div className="d-flex align-items-center">
+                        <img
+                            src={this.state.activeItem.image}
+                            alt=""
+                            className="mr-3"
+                            style={{ width: '300px', height: '300px', objectFit: "cover", paddingRight: '30px', paddingTop: '15px', paddingLeft: '15px', paddingBottom: '15px'}}
+                        />
+                        <div className="item-details">
+                            <div>
+                                <h4 style={{ color: "#e2e8f0", marginTop: "20px"}}>Description</h4>
+                                <p style={{ color: "#718096" }}>{this.state.activeItem.description}</p>
+                            </div>
+                            <div>
+                                <h4 style={{ color: "#e2e8f0" } }>Genre</h4>
+                                <p style={{ color: "#718096" }}>{this.state.activeItem.genre}</p>
+                            </div>
+                            <div>
+                                <h4 style={{ color: "#e2e8f0" }}>Size</h4>
+                                <p style={{ color: "#718096" }}>{this.state.activeItem.size}</p>
+                            </div>
+                            <div>
+                                <h4 style={{ color: "#e2e8f0" }}>In Stock?</h4>
+                                <p style={{ color: "#718096" }}>{this.state.activeItem.outOfStock ? "No" : "Yes"}</p>
+                            </div>
+                        </div>
+                    </div>
                 </ModalBody>
-                <ModalFooter>
+                <ModalFooter style={{ backgroundColor: "#1f1e25", borderColor: "#141318" }}>
                     <Button color="success" onClick={() => onSave(this.state.activeItem)}>
                         Save
+                    </Button>
+                    <p></p>
+                    <Button className="btn btn-danger" onClick={this.props.toggle}>
+                        X
                     </Button>
                 </ModalFooter>
             </Modal>

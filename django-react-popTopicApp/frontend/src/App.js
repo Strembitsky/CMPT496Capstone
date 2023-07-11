@@ -10,10 +10,14 @@ class App extends React.Component {
             description: "",
             genre: "",
             size: "",
+            image: "",
+            price: 0,
             outOfStock: false
         },
         popTopicList: [],
-        modal: false
+        modal: false,
+        itemCount: 0,
+        hoveredItem: null
     };
 
     async componentDidMount() {
@@ -22,20 +26,28 @@ class App extends React.Component {
             const popTopicList = await res.json();
             this.setState({
                 popTopicList
+            }, () => {
+                const { viewOutOfStock } = this.state;
+                const filteredItems = popTopicList.filter(
+                    item => item.outOfStock === viewOutOfStock
+                );
+                this.setState({
+                    itemCount: filteredItems.length
+                });
             });
         } catch (e) {
             console.log(e);
         }
     }
 
-    toggle = () => {
+    toggleAdd = () => {
         this.setState((prevState) => ({
             modal: !prevState.modal
         }));
     };
 
     handleSubmit = async (item) => {
-        this.toggle();
+        this.toggleAdd();
         if (item.id) {
             await axios.put(`http://localhost:8000/api/popTopics/${item.id}/`, item);
         } else {
@@ -57,45 +69,78 @@ class App extends React.Component {
         try {
             const res = await fetch("http://localhost:8000/api/popTopics/");
             const popTopicList = await res.json();
+            const { viewOutOfStock } = this.state;
+            const filteredItems = popTopicList.filter(
+                item => item.outOfStock === viewOutOfStock
+            );
             this.setState({
-                popTopicList
+                popTopicList,
+                itemCount: filteredItems.length
             });
         } catch (e) {
             console.log(e);
         }
     };
 
-    createItem = () => {
-        const item = { title: "", genre: "", size: "", description: "", outOfStock: false };
+    handleMouseEnter = (itemId) => {
+        this.setState({ hoveredItem: itemId });
+    };
+
+    handleMouseLeave = () => {
+        this.setState({ hoveredItem: null });
+    };
+
+    expandItem = (item) => {
+        console.log(item);
         this.setState({ activeItem: item, modal: !this.state.modal });
     };
 
     displayOutOfStock = status => {
         if (status) {
-            return this.setState({ viewOutOfStock: true });
+            this.setState({ viewOutOfStock: true }, () => {
+                this.fetchItems();
+            });
+        } else {
+            this.setState({ viewOutOfStock: false }, () => {
+                this.fetchItems();
+            });
         }
-        return this.setState({ viewOutOfStock: false });
     };
     renderTabList = () => {
+        const { viewOutOfStock, itemCount } = this.state;
+        const buttonStyle = {
+            padding: '8px 16px',
+            backgroundColor: '#718096',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginRight: '4px'
+        };
+
+        const activeButtonStyle = {
+            ...buttonStyle,
+            backgroundColor: '#3e68db'
+        };
+
         return (
             <div className="my-5 tab-list">
                 <div className="button-container">
                     <button
                         onClick={() => this.displayOutOfStock(true)}
-                        className={this.state.viewOutOfStock ? "active" : ""}
+                        style={viewOutOfStock ? activeButtonStyle : buttonStyle}
                     >
                         Out of Stock
                     </button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <button
                         onClick={() => this.displayOutOfStock(false)}
-                        className={this.state.viewOutOfStock ? "" : "active"}
+                        style={viewOutOfStock ? buttonStyle : activeButtonStyle}
                     >
                         In Stock
                     </button>
                 </div>
                 <p></p>
-                <p>{this.state.viewOutOfStock ? "Viewing Out of Stock items" : "Viewing In Stock Items"}</p>
+                <p style={{ color: "#9aa6b8"} }>{this.state.viewOutOfStock ? "# of Items: (" + itemCount + ')' : "# of Items: (" + itemCount + ')'}</p>
             </div>
         );
     };
@@ -106,38 +151,50 @@ class App extends React.Component {
         const newItems = this.state.popTopicList.filter(
             item => item.outOfStock === viewOutOfStock
         );
+       
         return newItems.map(item => (
             <li
                 key={item.id}
                 className="list-group-item d-flex justify-content-between align-items-center"
+                style={{
+                    cursor: "pointer",
+                    transition: "background-color 0.1s",
+                    backgroundColor: this.state.hoveredItem === item.id ? "#25242b" : "transparent",
+                    borderColor: "#141318"
+                }}
+                onMouseEnter={() => this.handleMouseEnter(item.id)}
+                onMouseLeave={this.handleMouseLeave}
             >
                 <span
                     className={`popTopic-title mr-2 ${this.state.viewOutOfStock ? "outOfStock-popTopic" : ""
                         }`}
                     title={item.title}
                 >
-                    <h1>{item.genre + " - " + item.title}</h1>
-                    <h5>{"Size " + item.size + " - " + item.description}</h5>
+                    <div className="d-flex align-items-center"
+                        onClick={() => this.expandItem(item)}
+                        style={{ cursor: "pointer" }}>
+                        <img src={item.image} alt="" className="mr-3" style={{ width: '70px', height: '100px', objectFit: "cover", marginRight: '15px'}} />
+                        <div>
+                            <h1 style={{color: "#e2e8f0", paddingLeft: "20px"}}>{item.genre + " - " + item.title}</h1>
+                            <h5 style={{ color: "#718096", paddingLeft: "20px" }}>{"Size " + item.size + " - " + (item.description.length > 200 ? `${item.description.slice(0, 197)}...` : item.description)}</h5>
+                        </div>
+                    </div>
                 </span>
-                <button className="btn btn-danger" onClick={() => this.handleDelete(item)}>
-                    X
-                </button>
             </li>
         ));
     };
 
     render() {
         return (
-            <main className="content">
-                <h1 className="text-white text-uppercase text-center my-4">PopTopic App</h1>
+            <main className="content" style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', paddingTop: "100px", paddingBottom: "100px", backgroundColor: "#16151a" }}>
                 <div className="row">
-                    <div className="col-md-6 col-sm-10 mx-auto p-0">
-                        <div className="card p-3">
+                    <div className="col-14 col-lg-12 mx-auto p-0" style={{minWidth: "1100px", maxWidth: "1100px"} }>
+                        <div className="content" style={{ backgroundColor: "#16151a"}}>
                             <div className="">
-                                <button onClick={this.createItem} className="btn btn-success">Add PopTopic</button>
+                                <button onClick={this.resetFilters} className="btn btn-success">Reset Filters</button>
                             </div>
                             {this.renderTabList()}
-                            <ul className="list-group list-group-flush">
+                            <ul className="list-group list-group-flush" style={{ backgroundColor: "#1f1e25", borderColor: "#141318" }}>
                                 {this.renderItems()}
                             </ul>
                         </div>
@@ -146,7 +203,7 @@ class App extends React.Component {
                 {this.state.modal ? (
                     <Modal
                         activeItem={this.state.activeItem}
-                        toggle={this.toggle}
+                        toggle={this.toggleAdd}
                         onSave={this.handleSubmit}
                     />
                 ) : null}
