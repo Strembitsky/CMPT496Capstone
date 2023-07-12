@@ -14,14 +14,15 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: black;
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: black;
+    overflow: hidden;
 }
 
 .App-link {
@@ -30,12 +31,6 @@
 
 .content {
     border: none;
-    overflow: hidden;
-    overflow-y: scroll;
-}
-
-.body {
-    overflow-y: scroll;
 }
 
 .card {
