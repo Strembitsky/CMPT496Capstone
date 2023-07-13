@@ -53,20 +53,21 @@ export default class CartModal extends React.Component {
     };
 
     calculateTotalPrice(itemsInCart) {
-        return itemsInCart.reduce((total, item) => total + item.cartItem.price * item.quantity, 0);
-    };
+        const totalPrice = itemsInCart.reduce((total, item) => total + item.cartItem.price * item.quantity, 0);
+        return totalPrice.toFixed(2);
+    }
     render() {
         const { activeCart, toggleCart, onCheckOut} = this.props;
         return (
-            <Modal isOpen={true} toggle={toggleCart} size="lg" style={{minWidth: "50%", minHeight: "50%"} }>
-                <ModalHeader toggle={toggleCart} style={{ backgroundColor: "#16151a", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View Cart</ModalHeader>
+            <Modal isOpen={true} toggle={toggleCart} size="lg">
+                <ModalHeader toggle={toggleCart} style={{ backgroundColor: "#1f1e25", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View Cart</ModalHeader>
                 <ModalBody style={{ backgroundColor: "#16151a"}}>
                     <div>
-                        <h2 style={{ textDecoration: 'underline', paddingLeft: '10px', paddingBottom: '10px', color: "#e2e8f0" }}>{"PopTopic Checkout"}</h2>
+                        <h2 style={{ textDecoration: 'underline', paddingLeft: '10px', paddingBottom: '10px', color: "#e2e8f0" }}>{"PopTopic Cart"}</h2>
                     </div>
-                    <div className="d-flex align-items-left">
+                    <div className="d-flex align-items-center">
                         <div className="item-details">
-                            {activeCart.itemsInCart.length !== 0 ? (
+                            {this.calculateTotalPrice(activeCart.itemsInCart) > 0 ? (
                                 <>
                                     {activeCart.itemsInCart.map((item) =>
                                         item.quantity !== 0 ? (
@@ -163,8 +164,8 @@ export default class CartModal extends React.Component {
                     <div style={{ marginTop: "20px", marginRight: "30px", alignItems: "center" }}>
                         <p style={{ color: "#29ff74", fontWeight: "bold" }}>Subtotal: ${this.calculateTotalPrice(activeCart.itemsInCart)} USD</p>
                     </div>
-                    <Button color="success" onClick={() => onCheckOut(this.state.cart)}>+ Purchase
-                    </Button>
+                    {this.calculateTotalPrice(activeCart.itemsInCart) > 0 ? <Button color="success" onClick={() => onCheckOut(this.state.cart)}>Checkout
+                    </Button> : ""}
                     <p style={{paddingRight:"15px"} }></p>
                     <Button className="btn btn-danger" onClick={toggleCart}>
                         X

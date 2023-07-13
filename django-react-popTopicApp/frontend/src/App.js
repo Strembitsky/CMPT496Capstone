@@ -1,6 +1,8 @@
 import React from "react";
 import Modal from "./components/Modal";
 import CartModal from "./components/CartModal";
+import PurchaseModal from "./components/PurchaseModal";
+import PurchaseSuccessModal from "./components/PurchaseSuccessModal";
 //import axios from "axios";
 import { FaShoppingCart } from 'react-icons/fa';
 import { FaArrowUp } from 'react-icons/fa';
@@ -28,7 +30,8 @@ class App extends React.Component {
         popTopicList: [],
         modal: false,
         cartModal: false,
-        cartView: false,
+        purchaseModal: false,
+        purchaseSuccessModal: false,
         itemCount: 0,
         hoveredItem: null,
         selectedFilters: ["In Stock", "Out of Stock"],
@@ -105,6 +108,26 @@ class App extends React.Component {
         }));
     };
 
+    // function that allows for closing a modal upon button click within the modal
+    togglePurchase = () => {
+        this.setState((prevState) => ({
+            purchaseModal: !prevState.purchaseModal
+        }));
+    };
+
+    togglePurchaseBack = () => {
+        this.setState((prevState) => ({
+            purchaseModal: !prevState.purchaseModal,
+            cartModal: !prevState.cartModal
+        }));
+    };
+
+    togglePurchaseSuccess = () => {
+        this.setState((prevState) => ({
+            purchaseSuccessModal: !prevState.purchaseSuccessModal
+        }));
+    }
+
     // function that submits an item from the frontend to the backend
     //handleSubmit = async (item) => {
     //    this.toggleAdd();
@@ -159,7 +182,17 @@ class App extends React.Component {
     };
 
     onCheckOut = () => {
-        console.log("BRING USER TO PURCHASING PAGE");
+        const storedCart = localStorage.getItem('cart');
+        const cart = storedCart ? JSON.parse(storedCart) : [];
+        this.setState({ cart: cart, cartModal: !this.state.cartModal, purchaseModal: !this.state.purchaseModal });
+    }
+
+    onPurchase = () => {
+        const cart = {
+            itemsInCart: [],
+        };
+        this.setState({ cart: cart, purchaseSuccessModal: !this.state.purchaseSuccessModal, purchaseModal: !this.state.purchaseModal })
+        localStorage.setItem('cart', JSON.stringify(cart));
     }
 
     // function that deletes an item from the frontend and the backend.
@@ -412,17 +445,27 @@ class App extends React.Component {
                     className={`popTopic-title mr-2`}
                     title={item.title}
                 >
-                    <div className="d-flex align-items-center"
-                        style={{ cursor: "pointer" }}>
-                        <img src={item.image} alt="" className="mr-3" style={{ width: '70px', height: '100px', objectFit: "cover", marginRight: '15px'}} />
+                    <div className="d-flex align-items-center" style={{ cursor: "pointer" }}>
+                        <img src={item.image} alt="" className="mr-3" style={{ width: '70px', height: '100px', objectFit: "cover", marginRight: '15px' }} />
                         <div>
-                            <h3 style={{color: "#e2e8f0", paddingLeft: "20px"}}>{item.genre + " - " + item.title}</h3>
+                            <h3 style={{ color: "#e2e8f0", paddingLeft: "20px" }}>{item.genre + " - " + item.title}</h3>
                             <h5 style={{ color: "#718096", paddingLeft: "20px", marginRight: "50px" }}>{"Size " + item.size + " - " + (item.description.length > 200 ? `${item.description.slice(0, 197)}...` : item.description)}</h5>
                         </div>
                     </div>
                 </span>
-                <span className="price" style={{ color: "#29ff74", paddingRight: "20px", paddingLeft: "20px", fontWeight: "bold", whiteSpace: "nowrap"}}>{"$" + item.price + " USD"}</span>
+                <div className="test d-flex justify-content-end" style={{ flex: "1" }}>
+                    {item.outOfStock === true ? (
+                        <span className="align-items-end" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", paddingTop: "10px" }}>
+                            <span className="price" style={{ color: "grey", paddingRight: "20px", paddingLeft: "20px", fontWeight: "bold", textDecoration: "line-through", whiteSpace: "nowrap", alignSelf: "flex-end" }}>{"$" + item.price + " USD"}</span>
+                            <p style={{ color: "red", paddingRight: "20px", paddingLeft: "20px", alignSelf: "flex-end" }}>Out of Stock</p>
+                        </span>
+                    ) : (
+                        <span className="price" style={{ color: "#29ff74", paddingRight: "20px", paddingLeft: "20px", fontWeight: "bold", whiteSpace: "nowrap" }}>{"$" + item.price + " USD"}</span>
+                    )}
+                </div>
             </li>
+
+
         ));
     };
 
@@ -443,7 +486,7 @@ class App extends React.Component {
                 {this.state.modal ? (
                     <Modal
                         activeItem={this.state.activeItem}
-                        toggle={this.toggleAdd}
+                        toggleAdd={this.toggleAdd}
                         onSave={this.handleSaveCart}
                     />
                     ) : null}
@@ -452,6 +495,19 @@ class App extends React.Component {
                             activeCart={this.state.cart}
                             toggleCart={this.toggleCart}
                             onCheckOut={this.onCheckOut}
+                        />
+                    ) : null}
+                    {this.state.purchaseModal ? (
+                        <PurchaseModal
+                            activeCart={this.state.cart}
+                            togglePurchase={this.togglePurchase}
+                            onPurchase={this.onPurchase}
+                            togglePurchaseBack={this.togglePurchaseBack}
+                        />
+                    ) : null}
+                    {this.state.purchaseSuccessModal ? (
+                        <PurchaseSuccessModal
+                            toggleModal={this.togglePurchaseSuccess}
                         />
                     ) : null}
 

@@ -31,7 +31,7 @@ export default class CustomModal extends React.Component {
         const { toggleAdd, onSave } = this.props;
         return (
             <Modal isOpen={true} toggle={toggleAdd} size="lg" style={{minWidth: "50%", minHeight: "50%"} }>
-                <ModalHeader toggle={toggleAdd} style={{ backgroundColor: "#16151a", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View PopTopic</ModalHeader>
+                <ModalHeader toggle={toggleAdd} style={{ backgroundColor: "#1f1e25", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View PopTopic</ModalHeader>
                 <ModalBody style={{ backgroundColor: "#16151a"}}>
                     <div>
                         <h2 style={{ textDecoration: 'underline', paddingLeft: '10px', color: "#e2e8f0" }}>{this.state.activeItem.genre + " - " + this.state.activeItem.title}</h2>
@@ -79,11 +79,18 @@ export default class CustomModal extends React.Component {
                     <div style={{ marginTop: "20px", marginRight: "15px", alignItems: "center" }}>
                         <p style={{ color: "#29ff74", fontWeight: "bold" }}>{"$" + this.state.activeItem.price + " USD"}</p>
                     </div>
-                    <Button color="success" onClick={() => onSave(this.state.activeItem)}>
-                        {((new Date().getTime() < new Date(this.state.activeItem.dateReleased).getTime()) ? "+ Add Preorder to Cart" : "+ Add to Cart")}
-                    </Button>
+                    {!this.state.activeItem.outOfStock ? (
+                        <Button color="success" onClick={() => onSave(this.state.activeItem)}>
+                            {new Date().getTime() < new Date(this.state.activeItem.dateReleased).getTime()
+                                ? "+ Add Preorder to Cart"
+                                : "+ Add to Cart"}
+                        </Button>
+                    ) : (
+                        <p style={{ color: "red" }}>Out of Stock</p>
+                    )}
+
                     <p></p>
-                    <Button className="btn btn-danger" onClick={this.props.toggle}>
+                    <Button className="btn btn-danger" onClick={toggleAdd}>
                         X
                     </Button>
                 </ModalFooter>
