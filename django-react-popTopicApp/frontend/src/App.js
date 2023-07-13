@@ -23,7 +23,7 @@ class App extends React.Component {
             quantity: 1
         },
         cart: {
-            itemsInCart: []
+            itemsInCart: [],
         },
         popTopicList: [],
         modal: false,
@@ -42,12 +42,15 @@ class App extends React.Component {
         try {
             const res = await fetch("http://localhost:8000/api/popTopics/");
             const popTopicList = await res.json();
+            const storedCart = localStorage.getItem('cart');
+            const cart = storedCart ? JSON.parse(storedCart) : [];
             this.setState({
                 popTopicList
             }, () => {
                 const filteredItems = this.filterItems();
                 this.setState({
-                    itemCount: filteredItems.length
+                    itemCount: filteredItems.length,
+                    cart: cart
                 });
             });
         } catch (e) {
@@ -115,7 +118,33 @@ class App extends React.Component {
 
     handleSaveCart = async (item) => {
         this.toggleAdd();
-        this.state.cart.itemsInCart.push(item);
+        let foundItem = false;
+
+        if (this.state.cart.itemsInCart.length !== 0) {
+            for (let tempItem of this.state.cart.itemsInCart) {
+                if (item.id === tempItem.cartItem.id) {
+                    tempItem.quantity += 1;
+                    foundItem = true;
+                    break;
+                }
+            }
+        }
+
+        if (!foundItem) {
+            await this.setState((prevState) => ({
+                cart: {
+                    ...prevState.cart,
+                    itemsInCart: [
+                        ...prevState.cart.itemsInCart,
+                        {
+                            cartItem: item,
+                            quantity: 1,
+                        },
+                    ],
+                },
+            }));
+        }
+
         localStorage.setItem('cart', JSON.stringify(this.state.cart));
     };
 
@@ -123,6 +152,14 @@ class App extends React.Component {
         const storedCart = localStorage.getItem('cart');
         const cart = storedCart ? JSON.parse(storedCart) : [];
         this.setState({ cart: cart, cartModal: !this.state.cartModal });
+    }
+
+    calculateTotalQuantity(itemsInCart) {
+        return itemsInCart.reduce((total, item) => total + item.quantity, 0);
+    };
+
+    onCheckOut = () => {
+        console.log("BRING USER TO PURCHASING PAGE");
     }
 
     // function that deletes an item from the frontend and the backend.
@@ -205,6 +242,7 @@ class App extends React.Component {
     };
 
     renderTabList = () => {
+        //localStorage.clear();
         const { itemCount } = this.state;
         // buttonStyle is for non-active buttons
         const buttonStyle = {
@@ -223,9 +261,14 @@ class App extends React.Component {
 
         return (
             <div className="my-3 tab-list col-12">
-                <div className="cart-icon d-flex justify-content-end" style={{ display: "flex", color: "#e2e8f0", paddingBottom: "30px" }}>
-                    <button onClick={this.viewCart} className="btn btn-success" style={{ display: "flex", paddingTop: "10px", paddingBottom: "10px", paddingRight: "10px", paddingLeft: "6px", justifyItems: "center", flexDirection: "column" }}>
-                        <FaShoppingCart size={36} color="white" />
+                <div className="cart-icon d-flex justify-content-end" style={{ display: "flex", color: "#e2e8f0", paddingBottom: "15px" }}>
+                    <button onClick={this.viewCart} className="btn btn-success" style={{ display: "flex", alignItems: "center", paddingTop: "5px", paddingBottom: "5px", paddingRight: "6px", paddingLeft: "6px", justifyItems: "center", flexDirection: "column" }}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <FaShoppingCart size={24} color="white" />
+                            <span style={{ marginLeft: "5px" }}>
+                                ({this.calculateTotalQuantity(this.state.cart.itemsInCart)})
+                            </span>
+                        </div>
                     </button>
                 </div>
                 <div className="filter-sort-container d-flex">
@@ -407,8 +450,8 @@ class App extends React.Component {
                     {this.state.cartModal ? (
                         <CartModal
                             activeCart={this.state.cart}
-                            toggle={this.toggleCart}
-                            onCheckOut={this.handleCheckout}
+                            toggleCart={this.toggleCart}
+                            onCheckOut={this.onCheckOut}
                         />
                     ) : null}
 

@@ -31,8 +31,8 @@ export default class CustomModal extends React.Component {
         const { toggleAdd, onSave } = this.props;
         return (
             <Modal isOpen={true} toggle={toggleAdd} size="lg" style={{minWidth: "50%", minHeight: "50%"} }>
-                <ModalHeader toggle={toggleAdd} style={{ backgroundColor: "#1f1e25", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View PopTopic</ModalHeader>
-                <ModalBody style={{ backgroundColor: "#1f1e25"}}>
+                <ModalHeader toggle={toggleAdd} style={{ backgroundColor: "#16151a", borderColor: "#141318", paddingLeft: "20px", color: "#e2e8f0"}}>View PopTopic</ModalHeader>
+                <ModalBody style={{ backgroundColor: "#16151a"}}>
                     <div>
                         <h2 style={{ textDecoration: 'underline', paddingLeft: '10px', color: "#e2e8f0" }}>{this.state.activeItem.genre + " - " + this.state.activeItem.title}</h2>
                     </div>
