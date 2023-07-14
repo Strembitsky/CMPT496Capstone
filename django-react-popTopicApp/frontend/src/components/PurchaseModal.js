@@ -7,6 +7,8 @@ import {
     ModalFooter
 
 } from "reactstrap";
+import { calculateTotalPrice, calculateTotalQuantity } from '../App'
+
 
 export default class PurchaseModal extends React.Component {
     constructor(props) {
@@ -48,16 +50,6 @@ export default class PurchaseModal extends React.Component {
             localStorage.setItem('cart', JSON.stringify(this.state.cart));
         }
     };
-    calculateTotalQuantity(itemsInCart) {
-        return itemsInCart.reduce((total, item) => total + item.quantity, 0);
-    };
-
-    calculateTotalPrice(itemsInCart) {
-        const totalPrice = itemsInCart.reduce((total, item) => total + item.cartItem.price * item.quantity, 0);
-        return totalPrice.toFixed(2);
-    }
-
-
 
     render() {
         const { activeCart, togglePurchase, onPurchase, togglePurchaseBack } = this.props;
@@ -153,10 +145,10 @@ export default class PurchaseModal extends React.Component {
                 </ModalBody>
                 <ModalFooter style={{ backgroundColor: "#1f1e25", borderColor: "#141318", paddingRight: "30px"}}>
                     <p style={{ color: "white", paddingRight: "30px", marker: "none" }}>
-                        # of Items: {this.calculateTotalQuantity(activeCart.itemsInCart)}
+                        # of Items: {calculateTotalQuantity(activeCart.itemsInCart)}
                     </p>
                     <div style={{ marginTop: "20px", marginRight: "30px", alignItems: "center" }}>
-                        <p style={{ color: "#29ff74", fontWeight: "bold" }}>Subtotal: ${this.calculateTotalPrice(activeCart.itemsInCart)} USD</p>
+                        <p style={{ color: "#29ff74", fontWeight: "bold" }}>Subtotal: ${calculateTotalPrice(activeCart.itemsInCart)} USD</p>
                     </div>
                     <Button color="success" onClick={() => onPurchase(this.state.cart)}>Purchase
                     </Button>

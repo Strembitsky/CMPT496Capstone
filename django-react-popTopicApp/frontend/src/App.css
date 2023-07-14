@@ -13,8 +13,27 @@
   }
 }
 
+.shipping-policy {
+    max-height: 80vh; /* Adjust the maximum height as needed */
+    overflow-y: auto;
+    max-width: 1920px; /* Adjust the maximum width as needed */
+    margin: 0 auto;
+}
+
+.cancellation-policy {
+    max-height: 80vh; /* Adjust the maximum height as needed */
+    overflow-y: auto;
+    max-width: 1920px; /* Adjust the maximum width as needed */
+    margin: 0 auto;
+}
+
+.policy-content {
+    white-space: pre-line;
+    word-break: break-word;
+}
+
 .App-header {
-    background-color: #282c34;
+    background-color: #1f1e25;
     min-height: 100vh;
     display: flex;
     flex-direction: column;

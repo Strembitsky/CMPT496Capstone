@@ -7,6 +7,7 @@ import {
     ModalFooter
 
 } from "reactstrap";
+import { calculateTotalPrice, calculateTotalQuantity } from '../App'
 
 export default class CartModal extends React.Component {
     constructor(props) {
@@ -15,21 +16,29 @@ export default class CartModal extends React.Component {
             cart: this.props.activeCart,
         };
     }
+
+    // pretty sure this isnt used
     handleChange = e => {
         let { name, value } = e.target;
         const cart = { ...this.state.cart, [name]: value };
         this.setState({ cart });
     };
+
+    // handles closing out of the cart
     handleClose = () => {
         const { toggleCart } = this.props;
         toggleCart(); // Call the toggleAdd function to close the Modal
     };
+
+    // handles increasing the quantity of items in the cart from this modal
     handleIncrease = async (item) => {
         item.quantity += 1;
         localStorage.setItem('cart', JSON.stringify(this.state.cart));
         const cart = { ...this.state.cart};
         this.setState({ cart });
     };
+
+    // handles decreasing and removing items from the cart if necessary
     handleDecrease = async (item) => {
         if (item.quantity > 1) {
             item.quantity -= 1;
@@ -48,14 +57,9 @@ export default class CartModal extends React.Component {
             localStorage.setItem('cart', JSON.stringify(this.state.cart));
         }
     };
-    calculateTotalQuantity(itemsInCart) {
-        return itemsInCart.reduce((total, item) => total + item.quantity, 0);
-    };
 
-    calculateTotalPrice(itemsInCart) {
-        const totalPrice = itemsInCart.reduce((total, item) => total + item.cartItem.price * item.quantity, 0);
-        return totalPrice.toFixed(2);
-    }
+    // 
+    
     render() {
         const { activeCart, toggleCart, onCheckOut} = this.props;
         return (
@@ -67,7 +71,7 @@ export default class CartModal extends React.Component {
                     </div>
                     <div className="d-flex align-items-center">
                         <div className="item-details">
-                            {this.calculateTotalPrice(activeCart.itemsInCart) > 0 ? (
+                            {calculateTotalPrice(activeCart.itemsInCart) > 0 ? (
                                 <>
                                     {activeCart.itemsInCart.map((item) =>
                                         item.quantity !== 0 ? (
@@ -159,12 +163,12 @@ export default class CartModal extends React.Component {
                 </ModalBody>
                 <ModalFooter style={{ backgroundColor: "#1f1e25", borderColor: "#141318", paddingRight: "30px"}}>
                     <p style={{ color: "white", paddingRight: "30px", marker: "none" }}>
-                        # of Items: {this.calculateTotalQuantity(activeCart.itemsInCart)}
+                        # of Items: {calculateTotalQuantity(activeCart.itemsInCart)}
                     </p>
                     <div style={{ marginTop: "20px", marginRight: "30px", alignItems: "center" }}>
-                        <p style={{ color: "#29ff74", fontWeight: "bold" }}>Subtotal: ${this.calculateTotalPrice(activeCart.itemsInCart)} USD</p>
+                        <p style={{ color: "#29ff74", fontWeight: "bold" }}>Subtotal: ${calculateTotalPrice(activeCart.itemsInCart)} USD</p>
                     </div>
-                    {this.calculateTotalPrice(activeCart.itemsInCart) > 0 ? <Button color="success" onClick={() => onCheckOut(this.state.cart)}>Checkout
+                    {calculateTotalPrice(activeCart.itemsInCart) > 0 ? <Button color="success" onClick={() => onCheckOut(this.state.cart)}>Checkout
                     </Button> : ""}
                     <p style={{paddingRight:"15px"} }></p>
                     <Button className="btn btn-danger" onClick={toggleCart}>

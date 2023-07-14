@@ -8,6 +8,7 @@ import {
 
 } from "reactstrap";
 
+
 export default class CustomModal extends React.Component {
     constructor(props) {
         super(props);
