@@ -23,6 +23,7 @@ from django.conf.urls.static import static
 
 router = routers.DefaultRouter()                   
 router.register(r'popTopics', views.PopTopicView, 'popTopic')  
+router.register(r'orders', views.OrderView, 'order')  
 
 urlpatterns = [
     path('admin/', admin.site.urls),

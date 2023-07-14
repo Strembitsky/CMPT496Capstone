@@ -7,12 +7,13 @@ import ShippingPolicyModal from "./components/ShippingPolicyModal";
 import CancellationPolicyModal from "./components/CancellationPolicyModal";
 import ContactUsModal from "./components/ContactUsModal";
 import AboutUsModal from "./components/AboutUsModal";
-//import axios from "axios";
+import axios from "axios";
 import { FaShoppingCart } from 'react-icons/fa';
 import { FaArrowUp } from 'react-icons/fa';
 import { FaArrowDown } from 'react-icons/fa';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 
+// fixes issues with "scroll bar bounce" showing different colors behind the page
 document.body.style.backgroundColor = "#1f1e25";
 
 // function responsible for calculating total quantity of items in cart
@@ -67,12 +68,13 @@ class App extends React.Component {
         hoveredLink: "",
     };
 
+    // function runs whenever anything changes
     async componentDidMount() {
         try {
             const res = await fetch("http://localhost:8000/api/popTopics/");
             const popTopicList = await res.json();
             const storedCart = localStorage.getItem('cart');
-            const cart = storedCart ? JSON.parse(storedCart) : [];
+            let cart = storedCart ? JSON.parse(storedCart) : [];
             this.setState({
                 popTopicList
             }, () => {
@@ -87,6 +89,7 @@ class App extends React.Component {
         }
     }
 
+    // functions that allows for the search bar to rapidly update item list
     handleSearchInputChange = async (event) => {
         const searchQuery = event.target.value;
         await this.setState({
@@ -102,7 +105,8 @@ class App extends React.Component {
     filterItems = () => {
         let inStockFilter = false;
         let outStockFilter = false;
-        
+
+        // sets stock filter booleans
         if (this.state.selectedFilters.includes("In Stock")) {
             inStockFilter = true;
         }
@@ -111,6 +115,7 @@ class App extends React.Component {
             outStockFilter = true;
         }
 
+        // fills selectedSizes array with currently selected size filters
         const selectedSizes = [];
         if (this.state.selectedFilters.includes("Size L")) {
             selectedSizes.push("L");
@@ -122,6 +127,7 @@ class App extends React.Component {
             selectedSizes.push("S");
         }
 
+        // filters items first based on the search bar
         const searchedItems = this.state.popTopicList.filter(item => {
             const searchCondition =
                 this.state.searchQuery === "" ||
@@ -205,17 +211,6 @@ class App extends React.Component {
         }));
     }
 
-    // function that submits an item from the frontend to the backend
-    //handleSubmit = async (item) => {
-    //    this.toggleAdd();
-    //    if (item.id) {
-    //        await axios.put(`http://localhost:8000/api/popTopics/${item.id}/`, item);
-    //    } else {
-    //        await axios.post("http://localhost:8000/api/popTopics/", item);
-    //    }
-    //    this.fetchItems(); // Refresh the list of items
-    //};
-
     // function that handles saving the cart to localStorage
     handleSaveCart = async (item) => {
         this.toggleAdd();
@@ -245,7 +240,6 @@ class App extends React.Component {
                 },
             }));
         }
-
         localStorage.setItem('cart', JSON.stringify(this.state.cart));
     };
 
@@ -283,25 +277,55 @@ class App extends React.Component {
         this.setState({ cart: cart, cartModal: !this.state.cartModal, purchaseModal: !this.state.purchaseModal });
     }
 
-    // function responsible for emptying the cart and opening the purchase success screen
-    onPurchase = () => {
-        const cart = {
-            itemsInCart: [],
-        };
-        this.setState({ cart: cart, purchaseSuccessModal: !this.state.purchaseSuccessModal, purchaseModal: !this.state.purchaseModal })
-        localStorage.setItem('cart', JSON.stringify(cart));
-    }
+    // function responsible for pushing purchases to the backend as orders
+    onPurchase = async (
+        cart,
+        name,
+        address,
+        city,
+        zipCode,
+        cardNumber,
+        expiration,
+        cvv,
+        email
+    ) => {
 
-    // function that deletes an item from the frontend and the backend.
-    // not currently used.
-    //handleDelete = async (item) => {
-    //    if (item.id) {
-    //        await axios.delete(`http://localhost:8000/api/popTopics/${item.id}/`, item);
-    //    } else {
-    //        await axios.post("http://localhost:8000/api/popTopics/", item);
-    //    }
-    //    this.fetchItems(); // Refresh the list of items
-    //};
+        // cleans the cart in instances where items were removed and currently have quantity 0
+        cart = cart.itemsInCart.filter(item => {
+            const nonZero = item.quantity === 0 ? false : true;
+            return nonZero;
+        });
+
+        // posts the order to the backend with a unique order id
+       await axios.post(`http://localhost:8000/api/orders/`, {
+            cart,
+            name,
+            address,
+            city,
+            zipCode,
+            cardNumber,
+            expiration,
+            cvv,
+            email,
+        })
+        .then(response => {
+            // after posting to backend, empty the cart and show purchase success modal
+            const emptiedCart = {
+                itemsInCart: [],
+            };
+            this.setState({
+                cart: emptiedCart,
+                purchaseSuccessModal: !this.state.purchaseSuccessModal,
+                purchaseModal: !this.state.purchaseModal
+            });
+            localStorage.setItem('cart', JSON.stringify(emptiedCart));
+        })
+        .catch(error => {
+            // Handle error in case the API request fails
+            console.error('Error:', error);
+            // Show an error message to the user if necessary
+        });
+    };
 
     // fetchItems is a function that collects the items, filters them,
     // and returns the filteredList and the itemCount of them.
@@ -583,8 +607,8 @@ class App extends React.Component {
                                         top: `${this.state.mouseY}px`,
                                         left: `${this.state.mouseX}px`,
                                         transform: "translate(10%, -50%)",
-                                        width: "500px", // Set the desired width for the expanded image
-                                        height: "500px", // Set the desired height for the expanded image
+                                        width: "500px",
+                                        height: "500px",
                                         backgroundColor: "rgba(0, 0, 0, 0.8)",
                                         display: "flex",
                                         justifyContent: "center",
@@ -637,7 +661,12 @@ class App extends React.Component {
                     <div style={{ backgroundColor: "#1f1e25", height: "10%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
                         <p style={{ color: "white", fontWeight: 600, fontSize: 24, paddingLeft: "30px", marginBottom: "1rem", marginTop: "1rem", alignItems: "center", paddingRight: "30px" }}>poptopic</p>
-                        <div style={{ display: "flex", alignItems: "center", borderRadius: "20px", backgroundColor: "#f0f0f0", padding: "5px 10px" }}>
+                            <div style={{ display: "flex", alignItems: "center", borderRadius: "20px", backgroundColor: "#f0f0f0", padding: "5px 10px" }}>
+                                <span style={{ marginRight: "5px" }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M14.854 13.145l-3.7-3.699a5.5 5.5 0 10-.708.708l3.699 3.7a.5.5 0 00.707-.708zM6.5 11A4.5 4.5 0 116.5 2a4.5 4.5 0 010 9z" />
+                                    </svg>
+                                </span>
                                 <input
                                     type="text"
                                     value={searchQuery}
@@ -645,11 +674,6 @@ class App extends React.Component {
                                     style={{ border: "none", outline: "none", backgroundColor: "#f0f0f0", flex: 1 }}
                                     placeholder="Search..."
                                 />
-                            <span style={{ marginLeft: "5px", cursor: "pointer" }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M14.854 13.145l-3.7-3.699a5.5 5.5 0 10-.708.708l3.699 3.7a.5.5 0 00.707-.708zM6.5 11A4.5 4.5 0 116.5 2a4.5 4.5 0 010 9z" />
-                                </svg>
-                            </span>
                         </div>
                     </div>
 
