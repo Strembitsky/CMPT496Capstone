@@ -146,7 +146,7 @@ export default class PurchaseModal extends React.Component {
                             <h2 style={{ textDecoration: 'underline', paddingLeft: '10px', paddingBottom: '10px', color: "#e2e8f0" }}>{"PopTopic Checkout"}</h2>
                         </div>
                         {activeCart.itemsInCart.length !== 0 ? (
-                            <div className="item-details">
+                            <div className="item-details" style={{whiteSpace: "nowrap"} }>
                                 {activeCart.itemsInCart.map((item) => (
                                     item.quantity !== 0 ? (
                                         <div
@@ -157,7 +157,7 @@ export default class PurchaseModal extends React.Component {
                                                 backgroundColor: "#1f1e25",
                                                 marginBottom: "2px",
                                                 padding: "10px",
-                                                maxHeight: "60px"
+                                                maxHeight: "80px"
                                             }}
                                         >
                                             <div className="d-flex align-items-center">
@@ -167,8 +167,8 @@ export default class PurchaseModal extends React.Component {
                                                     className="mr-3"
                                                     style={{ width: "30px", height: "50px", objectFit: "cover", marginRight: "5px" }}
                                                 />
-                                                <div>
-                                                    <h5 style={{ color: "#e2e8f0", whiteSpace: "nowrap" }}>
+                                                <div style={{width: "300px", whiteSpace: "pre-wrap", padding: "10px"} }>
+                                                    <h5 style={{ color: "#e2e8f0" }}>
                                                         {item.cartItem.genre + " - " + item.cartItem.title}
                                                     </h5>
                                                     <h6 style={{ color: "#718096", marginRight: "50px" }}>
@@ -287,7 +287,7 @@ export default class PurchaseModal extends React.Component {
                             onMouseEnter={this.handleMouseEnter}
                             onMouseLeave={this.handleMouseLeave}
                             style={{
-                                cursor: (this.isFormValid() ? "pointer" : "not-allowed"), opacity: (!this.isFormValid() ? 0.6 : 1.0)}}
+                                cursor: (this.isFormValid() ? "pointer" : "not-allowed"), opacity: (!this.isFormValid() ? 0.4 : 1.0)}}
                         >
                             Purchase
                         </Button>
