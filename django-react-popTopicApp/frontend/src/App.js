@@ -17,12 +17,12 @@ import { FaFacebook, FaInstagram } from 'react-icons/fa';
 document.body.style.backgroundColor = "#1f1e25";
 
 // function responsible for calculating total quantity of items in cart
-export function calculateTotalQuantity(itemsInCart) {
+export function calculateTotalQuantity(itemsInCart=[]) {
     return itemsInCart.reduce((total, item) => total + item.quantity, 0);
 }
 
 // function responsible for calculating total price of items in cart
-export function calculateTotalPrice(itemsInCart) {
+export function calculateTotalPrice(itemsInCart=[]) {
     const totalPrice = itemsInCart.reduce((total, item) => total + item.cartItem.price * item.quantity, 0);
     return totalPrice.toFixed(2);
 }
@@ -74,7 +74,7 @@ class App extends React.Component {
             const res = await fetch("http://localhost:8000/api/popTopics/");
             const popTopicList = await res.json();
             const storedCart = localStorage.getItem('cart');
-            let cart = storedCart ? JSON.parse(storedCart) : [];
+            let cart = storedCart !== '[]' ? JSON.parse(storedCart) : {itemsInCart: []};
             this.setState({
                 popTopicList
             }, () => {
@@ -215,17 +215,17 @@ class App extends React.Component {
     handleSaveCart = async (item) => {
         this.toggleAdd();
         let foundItem = false;
-
-        if (this.state.cart.itemsInCart.length !== 0) {
-            for (let tempItem of this.state.cart.itemsInCart) {
-                if (item.id === tempItem.cartItem.id) {
-                    tempItem.quantity += 1;
-                    foundItem = true;
-                    break;
+        if (this.state.cart.length !== 0) {
+            if (this.state.cart.itemsInCart.length !== 0) {
+                for (let tempItem of this.state.cart.itemsInCart) {
+                    if (item.id === tempItem.cartItem.id) {
+                        tempItem.quantity += 1;
+                        foundItem = true;
+                        break;
+                    }
                 }
             }
         }
-
         if (!foundItem) {
             await this.setState((prevState) => ({
                 cart: {
