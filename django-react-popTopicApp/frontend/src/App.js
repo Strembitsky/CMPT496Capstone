@@ -74,7 +74,7 @@ class App extends React.Component {
             const res = await fetch("http://localhost:8000/api/popTopics/");
             const popTopicList = await res.json();
             const storedCart = localStorage.getItem('cart');
-            let cart = storedCart !== '[]' ? JSON.parse(storedCart) : {itemsInCart: []};
+            let cart = storedCart ? JSON.parse(storedCart) : { itemsInCart: [] };
             this.setState({
                 popTopicList
             }, () => {
