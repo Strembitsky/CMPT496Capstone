@@ -1,13 +1,13 @@
 {% extends "admin/change_form.html" %}
 
 {% block content %}
-<div>{{order_summary}}</div>
+<div><h3>Order Summary:</h3>{{order_summary}}</div>
 {% for fieldset in adminform %}
     {% for line in fieldset %}
 <div class="form-row">
     {% for field in line %}
     <div class="field-box">
-        {{ field.label_tag }} {{ field.field }}
+        {{ field.label_tag }}<br />{{ field.field }}<br />
         {% if field.field.help_text %}
         <p class="help">{{ field.field.help_text|safe }}</p>
         {% endif %}

@@ -13,7 +13,7 @@ class OrderAdmin(admin.ModelAdmin):
         cart_items = ""
         for item in obj.cart:
             nut_item = item['cartItem']
-            cart_items += '(' + str(item['quantity']) + ") " + nut_item['title'] + '<br>'
+            cart_items += str(item['quantity']) + "x " + nut_item['title'] + '<br>'
         return mark_safe(cart_items)
 
     get_order_summary.short_description = 'Order Summary'
@@ -23,6 +23,7 @@ class OrderAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         extra_context['order_summary'] = self.get_order_summary(obj)
         return super().change_view(request, object_id, form_url=form_url, extra_context=extra_context)
+
 
 admin.site.register(PopTopic, PopTopicAdmin)
 admin.site.register(Order, OrderAdmin)
