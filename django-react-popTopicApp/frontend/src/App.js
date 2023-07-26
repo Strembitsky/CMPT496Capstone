@@ -12,6 +12,8 @@ import { FaShoppingCart } from 'react-icons/fa';
 import { FaArrowUp } from 'react-icons/fa';
 import { FaArrowDown } from 'react-icons/fa';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
 
 // fixes issues with "scroll bar bounce" showing different colors behind the page
 document.body.style.backgroundColor = "#1f1e25";
@@ -66,6 +68,7 @@ class App extends React.Component {
         mouseY: 0,
         searchQuery: "",
         hoveredLink: "",
+        currentGenre:"",
     };
 
     // function runs whenever anything changes
@@ -83,6 +86,7 @@ class App extends React.Component {
                     itemCount: filteredItems.length,
                     cart: cart
                 });
+                console.log(this.state);
             });
         } catch (e) {
             console.log(e);
@@ -114,7 +118,7 @@ class App extends React.Component {
         if (this.state.selectedFilters.includes("Out of Stock")) {
             outStockFilter = true;
         }
-
+        
         // fills selectedSizes array with currently selected size filters
         const selectedSizes = [];
         if (this.state.selectedFilters.includes("Size L")) {
@@ -144,7 +148,17 @@ class App extends React.Component {
             const stockCondition = (inStockFilter && outStockFilter) ? true : (inStockFilter ? !item.outOfStock : (outStockFilter ? item.outOfStock : true));
             return sizeCondition && stockCondition;
         });
-        return filteredItems;
+
+        //Filter the items based on genre
+        const genreItems = filteredItems.filter(item => {
+            if(this.state.currentGenre !== ""){
+                const genreCondition = item.genre === this.state.currentGenre;
+                return genreCondition;  
+            }
+            return true;
+        });
+
+        return genreItems;
     }
 
     // function that allows for closing a modal upon button click within the modal
@@ -651,7 +665,10 @@ class App extends React.Component {
 
         ));
     };
-
+    handleOnClickGenre = (value) => {
+        this.setState({currentGenre: value})
+    }
+    
     // renders out the app header as well as checks for other modals
     render() {
         const { searchQuery } = this.state;
@@ -660,7 +677,7 @@ class App extends React.Component {
                 <div className="app-header" style={{ backgroundColor: "#1f1e25", height: "10%" }}>
                     <div style={{ backgroundColor: "#1f1e25", height: "10%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                        <p style={{ color: "white", fontWeight: 600, fontSize: 24, paddingLeft: "30px", marginBottom: "1rem", marginTop: "1rem", alignItems: "center", paddingRight: "30px" }}>poptopic</p>
+                        <p onClick = {() => this.handleOnClickGenre("")} style={{ color: "white", fontWeight: 600, fontSize: 24, paddingLeft: "30px", marginBottom: "1rem", marginTop: "1rem", alignItems: "center", paddingRight: "30px" }}>poptopic</p>
                             <div style={{ display: "flex", alignItems: "center", borderRadius: "20px", backgroundColor: "#f0f0f0", padding: "5px 10px" }}>
                                 <span style={{ marginRight: "5px" }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -674,7 +691,29 @@ class App extends React.Component {
                                     style={{ border: "none", outline: "none", backgroundColor: "#f0f0f0", flex: 1 }}
                                     placeholder="Search..."
                                 />
-                        </div>
+                            </div>
+
+                            <DropdownButton variant="dark" id="dropdown-basic-button" title="Anime">
+                                <Dropdown.Item href="#/Attack-On-Titan" onClick = {() => this.handleOnClickGenre("Attack on Titan")}>Attack on Titan</Dropdown.Item>
+                                <Dropdown.Item href="#/Dragon-Ball" onClick = {() => this.handleOnClickGenre("Dragon Ball")} >Dragon Ball</Dropdown.Item>
+                                <Dropdown.Item href="#/Demon-Slayer" onClick = {() => this.handleOnClickGenre("Demon Slayer")}>Demon Slayer</Dropdown.Item>
+                                <Dropdown.Item href="#/Fairy-Tail" onClick = {() => this.handleOnClickGenre("FairyTail")}>FairyTail</Dropdown.Item>
+                                <Dropdown.Item href="#/My-Hero-Acadamia" onClick = {() => this.handleOnClickGenre("My Hero Acadamia")}>My Hero Acadamia</Dropdown.Item>
+                                <Dropdown.Item href="#/Pokemon" onClick = {() => this.handleOnClickGenre("Pokemon")}>Pokemon</Dropdown.Item>
+                            </DropdownButton>
+                            <DropdownButton variant="dark" id="dropdown-basic-button" title="Marvel">
+                                <Dropdown.Item href="#/action-1"onClick = {() => this.handleOnClickGenre("DC Universe")}>DC Universe</Dropdown.Item>
+                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Spider-man")}>Spider-man</Dropdown.Item>
+                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Avengers")}>Avengers</Dropdown.Item>
+                                <Dropdown.Item href="#/action-3"onClick = {() => this.handleOnClickGenre("Star Wars")}>Star Wars</Dropdown.Item>
+                            </DropdownButton>
+                            <DropdownButton variant="dark" id="dropdown-basic-button" title="Sports">
+                                <Dropdown.Item href="#/action-1"onClick = {() => this.handleOnClickGenre("Basketball")}>Basketball</Dropdown.Item>
+                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Hockey")}>Hockey</Dropdown.Item>
+                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Football")}>Football</Dropdown.Item>
+                                <Dropdown.Item href="#/action-3"onClick = {() => this.handleOnClickGenre("Boxing")}>Boxing</Dropdown.Item>
+                            </DropdownButton>
+                            
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: "30px" }}>
