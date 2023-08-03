@@ -1,19 +1,14 @@
 {% extends "admin/change_form.html" %}
 
 {% block content %}
-<div><h3>Order Summary:</h3>{{order_summary}}</div>
-{% for fieldset in adminform %}
-    {% for line in fieldset %}
-<div class="form-row">
-    {% for field in line %}
-    <div class="field-box">
-        {{ field.label_tag }}<br />{{ field.field }}<br />
-        {% if field.field.help_text %}
-        <p class="help">{{ field.field.help_text|safe }}</p>
-        {% endif %}
-    </div>
+    {% if order_summary %}
+<div><h3>Order Summary:</h3>{{ order_summary }}</div>
+    {% endif %}
+
+    {% for fieldset in adminform %}
+        {% for line in fieldset %}
+        {% endfor %}
     {% endfor %}
-</div>
-    {% endfor %}
-{% endfor %}
+
+{{ block.super }}  {# This includes the original content of the admin/change_form.html template, including the save/edit button #}
 {% endblock %}

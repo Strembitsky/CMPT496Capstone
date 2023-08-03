@@ -14,6 +14,7 @@ class PopTopic(models.Model):
    dateReleased = models.DateField(default=timezone.now)
    outOfStock = models.BooleanField(default=False)
    quantity = models.IntegerField(default=1)
+   generalType = models.TextField(blank=True, null=True, default="Unknown")
 
    def __str__(self):
      return self.title

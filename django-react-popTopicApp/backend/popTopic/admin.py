@@ -4,7 +4,7 @@ import json
 from django.utils.safestring import mark_safe
 
 class PopTopicAdmin(admin.ModelAdmin):
-  list = ('title', 'description', 'genre', 'size', 'image', 'price', 'dateCreated', 'dateReleased', 'outOfStock', 'quantity')
+  list = ('title', 'description', 'genre', 'size', 'image', 'price', 'dateCreated', 'dateReleased', 'outOfStock', 'quantity', 'generalType')
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'city', 'zipCode', 'cardNumber', 'expiration', 'cvv', 'email', 'order_date', 'processed')

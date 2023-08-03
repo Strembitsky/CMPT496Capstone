@@ -14,6 +14,7 @@ import { FaArrowDown } from 'react-icons/fa';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
+import { MdCancel } from 'react-icons/md';
 
 // fixes issues with "scroll bar bounce" showing different colors behind the page
 document.body.style.backgroundColor = "#1f1e25";
@@ -103,6 +104,15 @@ class App extends React.Component {
         await this.setState({
             itemCount: filteredItems.length
         });
+    };
+
+    // Method to toggle the selected genre
+    handleToggleGenre = (genre) => {
+        if (this.state.currentGenre === genre) {
+            this.setState({ currentGenre: "" });
+        } else {
+            this.setState({ Genre: genre });
+        }
     };
 
     // function that filters the items based on selected filters from the website
@@ -397,6 +407,10 @@ class App extends React.Component {
         });
     };
 
+    refreshPage = () => {
+        window.location.href = window.location.origin;
+    }
+
     // expandItem is a function that gets called on an item row
     // that opens up a new modal consisting of the expanded
     // item view
@@ -439,6 +453,30 @@ class App extends React.Component {
         }));
     };
 
+    // Function to organize the data into a structure based on unique "generalType" values and sort alphabetically
+    getGenreDataByGeneralType = () => {
+        const { popTopicList } = this.state;
+        const genreDataByGeneralType = {};
+
+        popTopicList.forEach((item) => {
+            const { generalType, genre } = item;
+            if (!genreDataByGeneralType[generalType]) {
+                genreDataByGeneralType[generalType] = new Set();
+            }
+            genreDataByGeneralType[generalType].add(genre);
+        });
+
+        // Sort the "generalTypes" alphabetically
+        const sortedGeneralTypes = Object.keys(genreDataByGeneralType).sort();
+
+        // Convert the sets to arrays and sort the "genres" under each "generalType" alphabetically
+        sortedGeneralTypes.forEach((generalType) => {
+            genreDataByGeneralType[generalType] = [...genreDataByGeneralType[generalType]].sort();
+        });
+
+        return { sortedGeneralTypes, genreDataByGeneralType };
+    };
+
     // this function renders the cart button, the filter and sort buttons, as well as total item counter
     renderTabList = () => {
 
@@ -463,24 +501,42 @@ class App extends React.Component {
         return (
             <div className="my-3 tab-list col-12">
                 <div className="filter-sort-container d-flex">
-                    <div className="filter-container col-6">
-                        <h3 style={{ color: "#e2e8f0" }}>Filters</h3>
-                        {this.state.availableFilters.map((filter) => (
-                            <button
-                                key={filter}
-                                onClick={() =>
-                                    this.state.selectedFilters.includes(filter)
-                                        ? this.removeFilter(filter) : this.addFilter(filter)
-                                }
-                                style={
-                                    this.state.selectedFilters.includes(filter)
-                                        ? activeButtonStyle : buttonStyle
-                                }
+                        <div className="filter-container col-7">
+                            <h3 style={{ color: "#e2e8f0" }}>Filters</h3>
+                            {this.state.availableFilters.map((filter) => (
+                                <button
+                                    key={filter}
+                                    onClick={() =>
+                                        this.state.selectedFilters.includes(filter)
+                                            ? this.removeFilter(filter)
+                                            : this.addFilter(filter)
+                                    }
+                                    style={
+                                        this.state.selectedFilters.includes(filter)
+                                            ? activeButtonStyle
+                                            : buttonStyle
+                                    }
+                                >
+                                    {filter}
+                                </button>
+                            ))}
+
+                        {/* Check if there is a selected genre */}
+                        {this.state.currentGenre && (
+                            <button className = "flex-container"
+                                onClick={() => this.handleOnClickGenre("")}
+                                style={activeButtonStyle}
                             >
-                                {filter}
+                                <div className="flex-container">
+                                    <span style={{ marginRight: "5px" }}>
+                                        <MdCancel />
+                                    </span>
+                                    {this.state.currentGenre}
+                                </div>
                             </button>
-                        ))}
-                    </div>
+                        )}
+                        </div>
+                
                     <div className="sort-container col-6">
                         <h3 className="d-flex justify-content-end" style={{ color: "#e2e8f0", paddingRight: "5px" }}>Sorting By</h3>
                         <div className="d-flex justify-content-end">
@@ -665,19 +721,24 @@ class App extends React.Component {
 
         ));
     };
-    handleOnClickGenre = (value) => {
-        this.setState({currentGenre: value})
+    handleOnClickGenre = async (value) => {
+        await this.setState({ currentGenre: value });
+        const filteredItems = this.filterItems();
+        await this.setState({
+            itemCount: filteredItems.length
+        });
     }
     
     // renders out the app header as well as checks for other modals
     render() {
         const { searchQuery } = this.state;
+        const { sortedGeneralTypes, genreDataByGeneralType } = this.getGenreDataByGeneralType();
         return (
             <div>
                 <div className="app-header" style={{ backgroundColor: "#1f1e25", height: "10%" }}>
                     <div style={{ backgroundColor: "#1f1e25", height: "10%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                        <p onClick = {() => this.handleOnClickGenre("")} style={{ color: "white", fontWeight: 600, fontSize: 24, paddingLeft: "30px", marginBottom: "1rem", marginTop: "1rem", alignItems: "center", paddingRight: "30px" }}>poptopic</p>
+                            <p onClick = {() => this.refreshPage()} style={{ color: "white", fontWeight: 600, fontSize: 24, paddingLeft: "30px", marginBottom: "1rem", marginTop: "1rem", alignItems: "center", paddingRight: "30px", cursor: "pointer"}}>poptopic</p>
                             <div style={{ display: "flex", alignItems: "center", borderRadius: "20px", backgroundColor: "#f0f0f0", padding: "5px 10px" }}>
                                 <span style={{ marginRight: "5px" }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -692,28 +753,28 @@ class App extends React.Component {
                                     placeholder="Search..."
                                 />
                             </div>
-
-                            <DropdownButton variant="dark" id="dropdown-basic-button" title="Anime">
-                                <Dropdown.Item href="#/Attack-On-Titan" onClick = {() => this.handleOnClickGenre("Attack on Titan")}>Attack on Titan</Dropdown.Item>
-                                <Dropdown.Item href="#/Dragon-Ball" onClick = {() => this.handleOnClickGenre("Dragon Ball")} >Dragon Ball</Dropdown.Item>
-                                <Dropdown.Item href="#/Demon-Slayer" onClick = {() => this.handleOnClickGenre("Demon Slayer")}>Demon Slayer</Dropdown.Item>
-                                <Dropdown.Item href="#/Fairy-Tail" onClick = {() => this.handleOnClickGenre("FairyTail")}>FairyTail</Dropdown.Item>
-                                <Dropdown.Item href="#/My-Hero-Acadamia" onClick = {() => this.handleOnClickGenre("My Hero Acadamia")}>My Hero Acadamia</Dropdown.Item>
-                                <Dropdown.Item href="#/Pokemon" onClick = {() => this.handleOnClickGenre("Pokemon")}>Pokemon</Dropdown.Item>
-                            </DropdownButton>
-                            <DropdownButton variant="dark" id="dropdown-basic-button" title="Marvel">
-                                <Dropdown.Item href="#/action-1"onClick = {() => this.handleOnClickGenre("DC Universe")}>DC Universe</Dropdown.Item>
-                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Spider-man")}>Spider-man</Dropdown.Item>
-                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Avengers")}>Avengers</Dropdown.Item>
-                                <Dropdown.Item href="#/action-3"onClick = {() => this.handleOnClickGenre("Star Wars")}>Star Wars</Dropdown.Item>
-                            </DropdownButton>
-                            <DropdownButton variant="dark" id="dropdown-basic-button" title="Sports">
-                                <Dropdown.Item href="#/action-1"onClick = {() => this.handleOnClickGenre("Basketball")}>Basketball</Dropdown.Item>
-                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Hockey")}>Hockey</Dropdown.Item>
-                                <Dropdown.Item href="#/action-2"onClick = {() => this.handleOnClickGenre("Football")}>Football</Dropdown.Item>
-                                <Dropdown.Item href="#/action-3"onClick = {() => this.handleOnClickGenre("Boxing")}>Boxing</Dropdown.Item>
-                            </DropdownButton>
-                            
+                            <div style={{ display: "flex", alignItems: "center"}} >
+                                {/* Iterate through each unique "generalType" */}
+                                {sortedGeneralTypes.map((generalType, index) => (
+                                    <DropdownButton
+                                        key={index}
+                                        variant="info"
+                                        id={`dropdown-basic-button-${index}`}
+                                        title={generalType}
+                                        style={{ marginLeft: index > 0 ? '15px' : '30px' }}
+                                    >
+                                        {/* Iterate through genres under the current "generalType" */}
+                                        {genreDataByGeneralType[generalType].map((genre, genreIndex) => (
+                                            <Dropdown.Item
+                                                key={genreIndex}
+                                                onClick={() => this.handleOnClickGenre(genre)}
+                                            >
+                                                {genre}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </DropdownButton>
+                                ))}
+                            </div>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: "30px" }}>
