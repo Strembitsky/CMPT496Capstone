@@ -91,6 +91,17 @@ export default class PurchaseModal extends React.Component {
             localStorage.setItem('cart', JSON.stringify(this.state.cart));
         }
     };
+    //this function uses the luhns algorithm to verify credit card numbers
+    luhnCheck = num => {
+        let arr = (num + '')
+          .split('')
+          .reverse()
+          .map(x => parseInt(x));
+        let lastDigit = arr.splice(0, 1)[0];
+        let sum = arr.reduce((acc, val, i) => (i % 2 !== 0 ? acc + val : acc + ((val * 2) % 9) || 9), 0);
+        sum += lastDigit;
+        return sum % 10 === 0;
+      };
 
     validateField = (fieldName) => {
         switch (fieldName) {
@@ -107,7 +118,10 @@ export default class PurchaseModal extends React.Component {
                 this.setState({ zipValid: /^\d{5}(?:[-\s]\d{4})?$|^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/.test(this.state.zip) });
                 break;
             case "cardNumber":
-                this.setState({ cardNumberValid: /^\d{16}$/.test(this.state.cardNumber) });
+                if(/^\d{16}$/.test(this.state.cardNumber)){
+                this.setState({ cardNumberValid:this.luhnCheck(this.state.cardNumber) });
+                break;
+                }
                 break;
             case "expiration":
                 this.setState({ expirationValid: /^\d{4}$/.test(this.state.expiration) });
